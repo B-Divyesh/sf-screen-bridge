@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Screen Bridge">
+  <rect width="512" height="512" rx="76" fill="#10151f"/>
+  <path fill="#9ff5c5" d="M78 109h244v35H113v224h193v35H78z"/>
+  <path fill="#f3f7e8" d="M137 186h119v35H137zm0 62h160v35H137zm0 62h93v35h-93z"/>
+  <path fill="#ffd166" d="M347 172h78v78h-78zm17 17v44h44v-44zm-17 134h78v78h-78zm17 17v44h44v-44z"/>
+  <path stroke="#9ff5c5" stroke-width="18" fill="none" d="M299 204h48m-48 158h48"/>
+</svg>
