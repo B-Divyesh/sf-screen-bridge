@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:browser": "playwright test",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -15,10 +16,11 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
-    "@types/node": "^22.10.1",
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^22.15.3",
     "playwright": "^1.58.2",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.3",
-    "vitest": "^2.1.8"
+    "typescript": "^5.9.3",
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
   }
 }

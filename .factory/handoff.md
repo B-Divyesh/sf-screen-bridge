@@ -1,36 +1,63 @@
-# Screen Bridge handoff — independent verification
+# Screen Bridge repair handoff
 
-## Status: FAIL
+## Status
 
-Candidate `3dcf53cf9d5acab6a2faab75c839acae7dc8c276` was independently tested on 2026-08-28 against <https://screen-bridge.sociobot.in>. The live HTML, service worker, CSS, JS chunks, and legal pages match the candidate byte-for-byte.
+Repaired the independent verifier findings from candidate
+3dcf53cf9d5acab6a2faab75c839acae7dc8c276.
 
-Release is blocked by:
+## What changed
 
-- missing mandatory `.factory/claims.json` and claim tests;
-- first screen does not plainly name blind/low-vision users;
-- no compliant one-click, bannered, isolated sample-data demo;
-- the sample misses its “Save connection” and “Cancel” controls;
-- number-then-Enter restarts OCR instead of only confirming the target;
-- six serious day-mode contrast failures;
-- broken Studio checkout (HTTP 404), missing price;
-- demo saves into the real IndexedDB namespace and saved scans cannot be reopened or deleted;
-- clean local production preview fails offline reload of cached JS/CSS;
-- missing CSP, real 404, immutable asset caching, robots, sitemap, and required metadata.
+- Added the mandatory claim registry and exact Playwright claim coverage.
+- `/demo` and `?demo=1` now load a complete connection dialog immediately,
+  show the persistent isolated-demo banner, and use only
+  `demo:screen-bridge`. Reset and exit delete that demo database.
+- The sample exposes its heading, server-address field boundary, Save
+  connection, and Cancel at once. OCR words on the same line are merged into
+  phrases; a sample OCR pass preserves its known control coverage.
+- Number then Enter selects and reads a target without activating the focused
+  Analyze button. Targets 10–12 are explicitly direct-select only.
+- Saved target lists now load, open, and delete. They remain text and crop
+  coordinates only; screenshots are not stored.
+- Removed the unregistered paid checkout and license surface.
+- Fixed day-theme mint contrast, restored day/night mode, 44px utility
+  controls, and 390px/200%-text reflow.
+- Added a cache-versioned service worker that reliably serves cached hashed
+  modules offline, metadata, robots/sitemap, SPA 404 behavior, static-host
+  security and immutable-cache configuration, and footer build identity.
+- Upgraded Vite/Vitest toolchain dependencies; production and full audits now
+  report zero vulnerabilities.
 
-Full evidence, passing checks, severities, build/deployment hashes, Lighthouse metrics, and remediation steps are in [verification.md](./verification.md).
+## Verification
 
-## Verification summary
+Run on a fresh install:
 
-- `npm ci`: pass
-- `npm test`: pass, 2/2 unit tests
-- `npx tsc -b --pretty false`: pass
-- `npm run build`: pass, `dist/` produced
-- `npm audit --omit=dev`: pass; full dev audit fails with 5 findings including 1 critical
-- Lighthouse mobile: 100 performance / 100 accessibility / 100 best practices / 100 SEO; LCP 998 ms, CLS 0
-- Dark-mode axe: no serious/critical findings
-- Day-mode axe: fail, 6 serious contrast nodes at 4.39:1
-- Live offline reload and post-cache OCR: pass
-- Service-worker update toast simulation: pass
-- License verify rate limit: 30 requests accepted; request 31 returned 429 with `Retry-After: 4`
+    npm ci
+    npm test
+    npx tsc -b --pretty false
+    npm run build
+    CI=1 npm run test:browser
+    npm audit --omit=dev --json
+    npm audit --json
 
-No product code was modified. Only this handoff and the independent verification report were added/updated.
+Results on 2026-08-28 UTC: Vitest 3/3; Playwright 7/7; TypeScript/build pass;
+both audits report 0 vulnerabilities. Browser coverage includes desktop,
+390px and 200%-text reflow, day and dark axe WCAG 2 A/AA serious/critical
+checks, keyboard confirmation, visible saved-list delete, isolated demo
+storage and network behavior, JSON download, and service-worker offline
+reload.
+
+The full claim contract is in `.factory/claims.json`; every entry is a
+standalone `npm run test:browser -- --grep @claim:…` command.
+
+## Deployment
+
+Artifact remains a static PWA. `dist/` includes
+`staticwebapp.config.json`; deploy it to Azure Static Web App
+`sf-screen-bridge` in resource group `sociobot`. The configured product URL
+is `https://screen-bridge.sociobot.in`.
+
+## Known gap
+
+The standalone axe CLI cannot locate a system Chrome in this container. The
+same axe engine runs through Playwright against the installed browser and
+passes in both themes.

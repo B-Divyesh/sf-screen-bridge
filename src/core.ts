@@ -11,10 +11,38 @@ export type Target = {
 
 export type WordLike = { text: string; confidence: number; bbox: { x0: number; y0: number; x1: number; y1: number } }
 
+/** Join words that share an OCR line before assigning a keyboard target. */
+export function phrasesFromWords(words: WordLike[]): WordLike[] {
+  const clean = words
+    .filter(word => word.text.trim().length > 0 && word.bbox.x1 > word.bbox.x0 && word.bbox.y1 > word.bbox.y0)
+    .sort((a, b) => a.bbox.y0 - b.bbox.y0 || a.bbox.x0 - b.bbox.x0)
+  const lines: WordLike[][] = []
+  for (const word of clean) {
+    const centre = (word.bbox.y0 + word.bbox.y1) / 2
+    const line = lines.find(candidate => {
+      const top = Math.min(...candidate.map(item => item.bbox.y0))
+      const bottom = Math.max(...candidate.map(item => item.bbox.y1))
+      const right = Math.max(...candidate.map(item => item.bbox.x1))
+      return centre >= top - 9 && centre <= bottom + 9 && word.bbox.x0 - right <= 48
+    })
+    ;(line || lines[lines.push([]) - 1]).push(word)
+  }
+  return lines.map(line => {
+    const ordered = [...line].sort((a, b) => a.bbox.x0 - b.bbox.x0)
+    return {
+      text: ordered.map(item => item.text.trim()).join(' '),
+      confidence: ordered.reduce((sum, item) => sum + item.confidence, 0) / ordered.length,
+      bbox: {
+        x0: Math.min(...ordered.map(item => item.bbox.x0)), y0: Math.min(...ordered.map(item => item.bbox.y0)),
+        x1: Math.max(...ordered.map(item => item.bbox.x1)), y1: Math.max(...ordered.map(item => item.bbox.y1)),
+      },
+    }
+  })
+}
+
 export function targetsFromWords(words: WordLike[], max = 12): Target[] {
   const unique = new Set<string>()
-  return words
-    .filter(word => word.text.trim().length > 0 && word.bbox.x1 > word.bbox.x0 && word.bbox.y1 > word.bbox.y0)
+  return phrasesFromWords(words)
     .filter(word => {
       const key = `${word.text.toLocaleLowerCase()}-${Math.round(word.bbox.y0 / 12)}`
       if (unique.has(key)) return false

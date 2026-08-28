@@ -16,7 +16,8 @@ field `#0b1119` hold the canvas. Text is paper `#f3f7e8`; muted text is
 `#b7c6c9`. The navigational signal is phosphor mint `#9ff5c5` with deep ink
 text. Amber `#ffd166` marks uncertainty and coral `#ff8c7d` marks errors.
 Day mode turns the same system into paper `#f4f0e5`, ink `#15202b`, mint
-`#087f5b`, amber `#795600`, and coral `#b13932`. All body and control pairs
+`#076a4d`, amber `#795600`, and coral `#b13932`. The darker day mint clears
+the 4.5:1 text contrast threshold against paper. All body and control pairs
 meet 4.5:1 contrast.
 
 ### Type and spacing

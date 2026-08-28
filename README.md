@@ -1,39 +1,41 @@
 # Screen Bridge
 
-Screen Bridge is a private, local-first helper for blind and low-vision people working with a remote desktop, legacy dialog, or canvas application whose controls are missing from the accessibility tree.
+Screen Bridge helps blind and low-vision people reach visual controls in a
+remote desktop or legacy dialog. It turns one selected screen region into
+numbered labels that can be heard with a screen reader.
 
-It captures a user-selected screen or window, lets the user crop one region, then runs local OCR and visual-boundary detection to make numbered targets. Press a number and Enter to hear a confirmed target. It does not click or control another computer, upload captures, recognise faces, or replace a screen reader.
+Open `/demo` or choose **Try it with sample data** to load the complete sample
+dialog in an isolated workspace. It works offline after the first visit.
 
 ## Use it
 
-1. Open the app in a current desktop browser and choose **Capture screen**.
-2. Select a screen, window, or browser tab in the browser permission prompt.
-3. Enter crop coordinates around one visual dialog, then choose **Analyze this crop**.
-4. Press `1`–`9`, then Enter, or select a target to hear it. Amber targets are explicitly uncertain.
+1. Choose **Capture a screen** and select a screen, window, or tab.
+2. Set crop coordinates around one dialog, then choose **Analyze this crop**.
+3. Press `1`–`9`, then `Enter`, to hear a target. Select targets 10–12
+   directly.
+4. Save a target list in this browser or export it as JSON.
 
-**Try a safe sample** exercises the complete OCR path without sharing a real screen. The first OCR scan loads local English recognition files; once the PWA has been opened online, the shell and recognition assets are cached for offline reuse.
+Screen pixels and OCR stay in this browser. Saved lists contain target text and
+crop coordinates, never a screenshot. See [/privacy](/privacy) and
+[/terms](/terms).
 
-## Privacy
+## Develop and verify
 
-Screen pixels and OCR are processed in the browser. Captures are kept only in memory. **Save target list locally** stores just text targets and crop coordinates in IndexedDB, never a screenshot. JSON export/import is explicit. See [/privacy](/privacy) and [/terms](/terms).
+Node 22+ is required.
 
-## Develop
+    npm ci
+    npm test
+    npm run test:browser
+    npx tsc -b --pretty false
+    npm run build
 
-Requirements: Node 22+.
-
-```sh
-npm install
-npm run dev
-npm test
-npm run build
-```
-
-The production static site is written to `dist/` with `dist/index.html` at its root. Deploy it as a same-origin static site so the service worker can install.
-
-## Paid Studio unlock
-
-The free local capture, OCR, keyboard targets, and export are never gated. Studio is a one-time Sociobot license for desktop-capture integrations and support. The purchase link is hosted by Sociobot; users can paste a license to restore it on another device. Verification is background-only and at most once per day, so it never blocks the free tool.
+The static PWA is emitted to `dist/` with `dist/index.html` at its root.
+Deploy `dist/` as a same-origin static site using the included
+`staticwebapp.config.json`. Run individual observable claim checks from
+`.factory/claims.json`.
 
 ## Credits
 
-The signal-desk hero illustration is an original Azure AI Foundry generated asset. Prompt and provenance are recorded in `.factory/design.md`. UI icons are hand-authored SVG.
+The signal-desk illustration is original Azure AI Foundry generated artwork.
+Its prompt and provenance are in `.factory/design.md`. UI icons are
+hand-authored SVG.

@@ -1,0 +1,7 @@
+[
+  {"id":"sample-demo","claim":"Try it with sample data loads a complete sample dialog.","where":"landing primary action, /demo","test":"npm run test:browser -- --grep @claim:sample-demo","sandbox":"fresh browser context at /demo; assert sample controls and the demo-only IndexedDB database"},
+  {"id":"keyboard-confirm","claim":"Press 1–9, then Enter, to hear a target.","where":"keyboard-target help","test":"npm run test:browser -- --grep @claim:keyboard-confirm","sandbox":"fresh /demo; press 1 then Enter and assert OCR was not restarted"},
+  {"id":"privacy-local","claim":"Screen Bridge processes screen pixels in this browser and sends no captures or target text to a server.","where":"landing facts, privacy page","test":"npm run test:browser -- --grep @claim:privacy-local","sandbox":"fresh /demo; save sample data while recording requests and inspect IndexedDB namespaces"},
+  {"id":"json-export","claim":"Exports a target list as JSON.","where":"workspace export button","test":"npm run test:browser -- --grep @claim:json-export","sandbox":"fresh /demo; download JSON and assert it contains the Save connection target"},
+  {"id":"offline-reload","claim":"Works offline after the first visit.","where":"landing fact, README","test":"npm run test:browser -- --grep @claim:offline-reload","sandbox":"fresh browser context; visit /demo until controlled by the service worker, set offline, reload, and assert the sample controls render"}
+]

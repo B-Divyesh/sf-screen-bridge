@@ -2,7 +2,7 @@
   "name": "Screen Bridge",
   "short_name": "Screen Bridge",
   "description": "Local screen pixels to keyboard-addressable controls.",
-  "start_url": "/?v=1",
+  "start_url": "/?v=2",
   "display": "standalone",
   "background_color": "#10151f",
   "theme_color": "#10151f",
