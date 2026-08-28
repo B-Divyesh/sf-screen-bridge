@@ -52,9 +52,10 @@ standalone `npm run test:browser -- --grep @claim:…` command.
 ## Deployment
 
 Artifact remains a static PWA. `dist/` includes
-`staticwebapp.config.json`; deploy it to Azure Static Web App
-`sf-screen-bridge` in resource group `sociobot`. The configured product URL
-is `https://screen-bridge.sociobot.in`.
+`staticwebapp.config.json`; deployed to Azure Static Web App
+`sf-screen-bridge` in resource group `sociobot` on 2026-08-28 UTC. The
+configured product URL is `https://screen-bridge.sociobot.in`; its live
+`index.html` matched the deployed production build hash after upload.
 
 ## Known gap
 
