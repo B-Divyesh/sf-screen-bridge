@@ -8,6 +8,7 @@ contract findings. Four public claims have no declared claim test.
 
 - Candidate implementation: `2e4dfce5162a6c6e0ae33398f8142d6f992123d3`
 - Documentation baseline: `296e5a8289eec9b14f8b368f15e8deee72fe2bb9`
+- Substantive verification document: `942f26d0a7a4418b1f76ded15723bec66c3110e4`
 - Live URL: <https://screen-bridge.sociobot.in>
 - Verification date: 2026-09-06 UTC
 - Starting tree: clean
