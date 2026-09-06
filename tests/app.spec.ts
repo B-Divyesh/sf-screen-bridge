@@ -1,5 +1,22 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
+
+async function savedRecord(page: Page): Promise<Record<string, unknown>> {
+  return page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('demo:screen-bridge')
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    const record = await new Promise<unknown>((resolve, reject) => {
+      const request = db.transaction('scans').objectStore('scans').getAll()
+      request.onsuccess = () => resolve(request.result[0])
+      request.onerror = () => reject(request.error)
+    })
+    db.close()
+    return JSON.parse(JSON.stringify(record))
+  })
+}
 
 test('@claim:sample-demo one click opens an isolated, complete sample dialog', async ({ page }) => {
   await page.goto('/demo')
@@ -33,6 +50,42 @@ test('@claim:privacy-local the demo makes no cross-origin request and saves sepa
   expect(names).not.toContain('screen-bridge')
 })
 
+test('@claim:local-ocr analyze completes with the shipped local OCR runtime', async ({ page }) => {
+  const errors: string[] = []
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()) })
+  page.on('pageerror', error => errors.push(String(error)))
+  await page.goto('/demo')
+  await page.getByRole('button', { name: 'Analyze this crop' }).click()
+  await expect(page.locator('#state')).toHaveText(/\d+ targets found\. Use a number, then Enter, to hear one\./, { timeout: 80_000 })
+  expect(await page.locator('.target').count()).toBeGreaterThan(0)
+  expect(errors).toEqual([])
+})
+
+test('@claim:free-core saves and exports a target list without an account', async ({ page }) => {
+  await page.goto('/demo')
+  await page.getByRole('button', { name: 'Save target list locally' }).click()
+  await expect(page.locator('#state')).toContainText('Target list saved in the demo workspace')
+  const download = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Export JSON' }).click()
+  const text = await (await download).createReadStream().then(async stream => {
+    const chunks: Buffer[] = []
+    for await (const chunk of stream!) chunks.push(chunk)
+    return Buffer.concat(chunks).toString()
+  })
+  expect(JSON.parse(text).targets).toEqual(expect.arrayContaining([expect.objectContaining({ label: 'Save connection' })]))
+  expect(page.url()).toContain('/demo')
+})
+
+test('@claim:screenshot-free-saves saves target text and crop coordinates without an image payload', async ({ page }) => {
+  await page.goto('/demo')
+  await page.getByRole('button', { name: 'Save target list locally' }).click()
+  await expect(page.locator('#state')).toContainText('No screenshot was saved.')
+  const record = await savedRecord(page)
+  expect(record.targets).toEqual(expect.arrayContaining([expect.objectContaining({ label: 'Save connection' })]))
+  expect(record.crop).toEqual(expect.objectContaining({ x: 0, y: 0, width: 920, height: 520 }))
+  expect(JSON.stringify(record)).not.toMatch(/data:image|base64|screenshot|canvas|pixels/i)
+})
+
 test('@claim:json-export exports an observable target list', async ({ page }) => {
   await page.goto('/demo')
   const download = page.waitForEvent('download')
@@ -63,8 +116,11 @@ test('saved target lists can be opened and deleted', async ({ page }) => {
   await expect(page.getByText('No saved target lists in this demo workspace.')).toBeVisible()
 })
 
-test('desktop and 390px day mode have no serious accessibility violations', async ({ page }) => {
+test('selected and saved targets have no serious accessibility violations in either theme', async ({ page }) => {
   await page.goto('/demo')
+  await page.keyboard.press('1')
+  await page.keyboard.press('Enter')
+  await page.getByRole('button', { name: 'Save target list locally' }).click()
   for (const day of [false, true]) {
     if (day) await page.getByRole('button', { name: 'Day mode' }).click()
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
@@ -74,4 +130,22 @@ test('desktop and 390px day mode have no serious accessibility violations', asyn
   await page.evaluate(() => { document.documentElement.style.fontSize = '200%' })
   const overflow = await page.evaluate(() => ({ width: document.documentElement.scrollWidth, offenders: [...document.querySelectorAll<HTMLElement>('*')].filter(element => element.getBoundingClientRect().right > window.innerWidth + 1).slice(0, 5).map(element => [element.tagName, element.className, element.getBoundingClientRect().right]) }))
   expect(overflow.width <= 390, JSON.stringify(overflow)).toBe(true)
+})
+
+test('local OCR failure keeps sample targets available for recovery', async ({ page }) => {
+  await page.addInitScript(() => {
+    const NativeWorker = window.Worker
+    window.Worker = new Proxy(NativeWorker, {
+      construct(target, args, newTarget) {
+        void target
+        void args
+        void newTarget
+        throw new Error('Simulated local OCR worker failure')
+      },
+    })
+  })
+  await page.goto('/demo')
+  await page.getByRole('button', { name: 'Analyze this crop' }).click()
+  await expect(page.locator('#state')).toHaveText('Sample targets are ready. Local OCR will retry when recognition files are available.')
+  await expect(page.getByRole('button', { name: 'Save connection' })).toBeVisible()
 })
