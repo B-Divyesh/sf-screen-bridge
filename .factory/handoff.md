@@ -3,6 +3,7 @@
 ## Status: PASS
 
 Implementation commit: `2e4dfce5162a6c6e0ae33398f8142d6f992123d3`.
+Substantive verification-document commit: `b1fb475a6d6700109b360e14dfeec247f0429265`.
 
 Deployed to <https://screen-bridge.sociobot.in> on 2026-09-06 UTC. The live
 `index.html`, service worker, initial CSS, initial app JavaScript, and deferred
@@ -92,4 +93,3 @@ The free core is complete. No paid offer is currently advertised or registered,
 so no billing metadata file is applicable. Future paid desktop-capture
 integrations and support described in the research brief remain unavailable
 until they are separately built and registered with Sociobot billing.
-
